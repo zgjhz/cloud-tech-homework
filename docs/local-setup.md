@@ -55,3 +55,21 @@ docker version
 docker compose version
 docker run --rm hello-world
 ```
+
+## ДЗ 3: Kubernetes
+
+Установлены Homebrew kubectl 1.37.2 и minikube 1.39.0.
+Профиль `cloud-homework`: Docker driver, 2 CPU, 4096 MiB RAM,
+Kubernetes 1.37.0, containerd 2.3.4. Используйте Homebrew kubectl первым в PATH:
+
+```sh
+export PATH="/opt/homebrew/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
+brew install kubectl minikube
+minikube start -p cloud-homework --driver=docker --cpus=2 --memory=4096 --kubernetes-version=v1.37.0
+kubectl --context cloud-homework wait --for=condition=Ready node/cloud-homework --timeout=120s
+kubectl --context cloud-homework get nodes
+```
+
+Первый запуск скачивает базовый образ и компоненты Kubernetes. При повторном
+запуске профиль и кэш используются снова. Команды лабораторной явно задают
+context, чтобы не применить ресурсы в другой кластер.
