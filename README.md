@@ -9,4 +9,4 @@
 2. [ДЗ 2 — Docker Compose, HTTP entry point и PostgreSQL](homework-02/README.md) — выполнено и проверено.
 3. [ДЗ 3 — Kubernetes frontend/backend](homework-03/README.md) — выполнено и проверено.
 4. [ДЗ 5 — RabbitMQ, маршрутизация и DLQ](homework-05/README.md) — выполнено и проверено.
-5. ДЗ 6 — GitLab CI/CD и Container Registry (запланировано).
+5. [ДЗ 6 — GitLab CI/CD и Container Registry](homework-06/README.md) — локальные проверки готовы; запуск CI ожидает проверки аккаунта GitLab.

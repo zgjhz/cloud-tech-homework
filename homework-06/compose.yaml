@@ -1,0 +1,28 @@
+name: cloud-homework-06
+services:
+  db:
+    image: postgres:17.12-bookworm
+    environment:
+      POSTGRES_DB: homework_ci
+      POSTGRES_USER: homework_ci
+      POSTGRES_PASSWORD: disposable-ci-password
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homework_ci -d homework_ci"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  checks:
+    build:
+      context: ../homework-02
+      target: test
+    environment:
+      PGHOST: db
+      PGDATABASE: homework_ci
+      PGUSER: homework_ci
+      PGPASSWORD: disposable-ci-password
+      INIT_TEST_DATABASE: "1"
+    depends_on:
+      db:
+        condition: service_healthy

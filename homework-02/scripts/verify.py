@@ -1,12 +1,11 @@
-#!/usr/bin/env python3
 """Host-side smoke/persistence checks. Never deletes volumes."""
 import argparse
 import json
-from pathlib import Path
 import subprocess
 import time
 import urllib.error
 import urllib.request
+from pathlib import Path
 from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[1]

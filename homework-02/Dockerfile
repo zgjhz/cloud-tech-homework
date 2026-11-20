@@ -14,5 +14,7 @@ USER root
 COPY requirements-test.txt .
 RUN pip install --no-cache-dir -r requirements-test.txt
 COPY tests ./tests
+COPY scripts ./scripts
+COPY db/init.sql ./db/init.sql
 USER app
 CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests"]

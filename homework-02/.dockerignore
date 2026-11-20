@@ -5,4 +5,8 @@
 !app/**
 !tests/
 !tests/**
+!scripts/
+!scripts/**
+!db/
+!db/init.sql
 **/__pycache__/

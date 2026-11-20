@@ -1,0 +1,34 @@
+name: cloud-homework-06-registry
+services:
+  db:
+    build: ../homework-02/db
+    environment:
+      POSTGRES_DB: homework_registry
+      POSTGRES_USER: homework_registry
+      POSTGRES_PASSWORD: disposable-smoke-password
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homework_registry -d homework_registry"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  entrypoint:
+    image: ${HOMEWORK_IMAGE:?Set HOMEWORK_IMAGE to Registry image with full commit SHA}
+    platform: linux/amd64
+    environment:
+      PGHOST: db
+      PGDATABASE: homework_registry
+      PGUSER: homework_registry
+      PGPASSWORD: disposable-smoke-password
+    ports:
+      - "127.0.0.1:8086:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+

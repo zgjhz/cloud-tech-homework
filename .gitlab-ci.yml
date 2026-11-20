@@ -1,0 +1,72 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+stages:
+  - check
+  - publish
+
+default:
+  image: python:3.13.9-slim-bookworm
+  tags:
+    - saas-linux-small-amd64
+  interruptible: true
+
+.python_checks:
+  before_script:
+    - cd homework-02
+    - python -m pip install --no-cache-dir -r requirements-test.txt
+
+lint:
+  extends: .python_checks
+  stage: check
+  script:
+    - python -m ruff check --no-cache app tests scripts
+
+test:
+  extends: .python_checks
+  stage: check
+  services:
+    - name: postgres:17.12-bookworm
+      alias: db
+  variables:
+    POSTGRES_DB: homework_ci
+    POSTGRES_USER: homework_ci
+    POSTGRES_PASSWORD: disposable-ci-password
+    PGHOST: db
+    PGDATABASE: homework_ci
+    PGUSER: homework_ci
+    PGPASSWORD: disposable-ci-password
+    INIT_TEST_DATABASE: "1"
+  script:
+    - python -m pytest -q -p no:cacheprovider tests
+
+publish:
+  stage: publish
+  image: docker:29.9.3-cli
+  services:
+    - name: docker:29.9.3-dind
+      alias: docker
+      variables:
+        HEALTHCHECK_TCP_PORT: "2376"
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_TLS_VERIFY: "1"
+    DOCKER_CERT_PATH: /certs/client
+  needs:
+    - lint
+    - test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  before_script:
+    - docker info
+    - printf '%s' "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - docker build --pull --platform linux/amd64 --target runtime --label "org.opencontainers.image.revision=$CI_COMMIT_SHA" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" homework-02
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+  after_script:
+    - docker logout "$CI_REGISTRY"
