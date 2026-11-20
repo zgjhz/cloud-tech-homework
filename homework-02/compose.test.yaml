@@ -1,0 +1,9 @@
+# Override the existing entrypoint for tests; no third service is introduced.
+services:
+  entrypoint:
+    build:
+      target: test
+    ports: !reset []
+    healthcheck:
+      disable: true
+    command: ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests"]

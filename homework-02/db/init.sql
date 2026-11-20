@@ -1,0 +1,4 @@
+CREATE TABLE items (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(200) NOT NULL CHECK (length(trim(name)) > 0)
+);
