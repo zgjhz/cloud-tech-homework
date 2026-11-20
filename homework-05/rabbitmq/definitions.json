@@ -1,0 +1,99 @@
+{
+  "exchanges": [
+    {
+      "name": "operations",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "operations.dlx",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "operations.add",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "operations.multiply",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "operations.divide",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "operations.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "operations",
+      "vhost": "/",
+      "destination": "operations.add",
+      "destination_type": "queue",
+      "routing_key": "add",
+      "arguments": {}
+    },
+    {
+      "source": "operations",
+      "vhost": "/",
+      "destination": "operations.multiply",
+      "destination_type": "queue",
+      "routing_key": "multiply",
+      "arguments": {}
+    },
+    {
+      "source": "operations",
+      "vhost": "/",
+      "destination": "operations.divide",
+      "destination_type": "queue",
+      "routing_key": "divide",
+      "arguments": {}
+    },
+    {
+      "source": "operations.dlx",
+      "vhost": "/",
+      "destination": "operations.dlq",
+      "destination_type": "queue",
+      "routing_key": "failed",
+      "arguments": {}
+    }
+  ],
+  "policies": [
+    {
+      "name": "operations-dlx",
+      "vhost": "/",
+      "pattern": "^operations\\.(add|multiply|divide)$",
+      "apply-to": "queues",
+      "definition": {
+        "dead-letter-exchange": "operations.dlx",
+        "dead-letter-routing-key": "failed"
+      },
+      "priority": 1
+    }
+  ]
+}

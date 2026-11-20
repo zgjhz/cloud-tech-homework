@@ -1,0 +1,35 @@
+name: cloud-homework-05
+x-client: &client
+  build: .
+  environment:
+    RABBITMQ_HOST: rabbitmq
+    RABBITMQ_USER: ${RABBITMQ_USER:?Copy .env.example to .env}
+    RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Copy .env.example to .env}
+  depends_on:
+    rabbitmq:
+      condition: service_healthy
+  restart: on-failure
+services:
+  rabbitmq:
+    build: ./rabbitmq
+    hostname: homework-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?Copy .env.example to .env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Copy .env.example to .env}
+    ports:
+      - "127.0.0.1:${MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/topology-ready && rabbitmq-diagnostics -q check_running"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  producer:
+    <<: *client
+    command: ["python", "-m", "app.producer", "--interval", "5"]
+  consumer:
+    <<: *client
+    command: ["python", "-m", "app.consumer"]
+volumes:
+  rabbitmq-data:
